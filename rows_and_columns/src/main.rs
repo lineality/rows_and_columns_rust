@@ -1,16 +1,17 @@
-//! # CSV Inspection Tool
+//! # Memory-Efficient CSV Inspection Tool
 //! 
-//! A command-line tool for inspecting CSV files, displaying
-//! basic information about structure and contents.
+//! A command-line tool for inspecting CSV files without loading them entirely
+//! into memory. Ideal for working with massive datasets that would crash
+//! general-purpose software.
 //! 
 //! ## Usage
 //! 
 //! ```
-//! # To describe a CSV file:
-//! cargo run -- --describe path/to/file.csv
+//! # To describe a CSV file (headers and row count):
+//! cargo run -- --describe path/to/large_file.csv
 //! 
 //! # To display a specific row:
-//! cargo run -- --row 5 path/to/file.csv
+//! cargo run -- --row 5 path/to/large_file.csv
 //! ```
 
 mod rows_and_columns_module;

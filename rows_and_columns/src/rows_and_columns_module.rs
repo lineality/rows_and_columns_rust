@@ -1,12 +1,11 @@
-
-//! # CSV Inspection Tool
+//! # Memory-Efficient CSV Inspection Tool
 //! 
-//! This module provides functions for basic inspection of CSV files
-//! including header counting, row counting, and displaying CSV data
-//! in simple TUI tables.
+//! This module provides functions for inspecting large CSV files without
+//! loading them entirely into memory. It supports header inspection and
+//! random access to specific rows using efficient streaming techniques.
 
 use std::fs::File;
-use std::io::{self, BufRead, BufReader};
+use std::io::{self, BufRead, BufReader, Read, Seek, SeekFrom, Write};
 use std::path::Path;
 use std::env;
 use std::process;
@@ -27,6 +26,18 @@ use std::process;
 pub fn csv_inspection_main() {
     // Get command line arguments
     let args: Vec<String> = env::args().collect();
+    
+    // If no arguments are provided (just the program name), start interactive mode
+    if args.len() == 1 {
+        match q_and_q_tool() {
+            Ok(_) => (),
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                process::exit(1);
+            }
+        }
+        return;
+    }
     
     // Parse the command-line arguments
     if args.len() < 2 {
@@ -102,6 +113,90 @@ pub fn csv_inspection_main() {
     }
 }
 
+// Add this function to the rows_and_columns.rs file
+
+/// Provides an interactive question-and-answer interface for the CSV inspection tool.
+/// This function is triggered when the program is run without arguments.
+///
+/// # Returns
+///
+/// * `Result<(), io::Error>` - Success or an I/O error
+pub fn q_and_q_tool() -> Result<(), io::Error> {
+    // Print welcome banner
+    println!("=== CSV Inspection Tool ===");
+    println!();
+    
+    // Display help information
+    println!("Available operations:");
+    println!("  1. describe - Show column count, headers, and row count");
+    println!("  2. row      - Display a specific row with headers");
+    println!();
+    
+    // Get file path
+    print!("1. What is the path to your .csv file? ");
+    io::stdout().flush()?; // Ensure prompt is displayed before reading input
+    
+    let mut file_path = String::new();
+    io::stdin().read_line(&mut file_path)?;
+    let file_path = file_path.trim();
+    
+    // Validate file path
+    if !Path::new(file_path).exists() {
+        return Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            format!("File not found: '{}'", file_path)
+        ));
+    }
+    
+    // Get operation choice
+    println!();
+    println!("2. What operation do you want?");
+    println!("   (by option number)");
+    println!("   1. describe file");
+    println!("   2. row: print a row");
+    print!("Enter option number: ");
+    io::stdout().flush()?;
+    
+    let mut choice = String::new();
+    io::stdin().read_line(&mut choice)?;
+    let choice = choice.trim();
+    
+    // Process choice
+    match choice {
+        "1" => {
+            println!("\nExecuting: describe {}\n", file_path);
+            describe_csv(file_path)
+        },
+        "2" => {
+            print!("Enter row number to display: ");
+            io::stdout().flush()?;
+            
+            let mut row_index_str = String::new();
+            io::stdin().read_line(&mut row_index_str)?;
+            
+            // Parse row index
+            match row_index_str.trim().parse::<usize>() {
+                Ok(row_index) => {
+                    println!("\nExecuting: row {} {}\n", row_index, file_path);
+                    display_csv_row(file_path, row_index)
+                },
+                Err(_) => {
+                    Err(io::Error::new(
+                        io::ErrorKind::InvalidInput,
+                        "Invalid row number. Please enter a non-negative integer."
+                    ))
+                }
+            }
+        },
+        _ => {
+            Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                format!("Invalid option: '{}'. Please enter 1 or 2.", choice)
+            ))
+        }
+    }
+}
+
 /// Prints the tool's usage instructions.
 ///
 /// # Arguments
@@ -114,51 +209,6 @@ fn print_usage(program_name: &str) {
     eprintln!("\nExample:");
     eprintln!("  {} --describe data.csv", program_name);
     eprintln!("  {} --row 5 data.csv", program_name);
-}
-
-/// Represents a CSV file's structure and content.
-struct CsvData {
-    /// The column headers from the CSV file
-    headers: Vec<String>,
-    /// The rows of data, each containing a vector of string values
-    rows: Vec<Vec<String>>,
-}
-
-/// Reads a CSV file and returns its headers and content.
-///
-/// # Arguments
-///
-/// * `file_path` - Path to the CSV file to be read
-///
-/// # Returns
-///
-/// * `Result<CsvData, io::Error>` - The parsed CSV data or an error
-fn read_csv_file(file_path: impl AsRef<Path>) -> Result<CsvData, io::Error> {
-    // Open the file
-    let file = File::open(file_path)?;
-    let reader = BufReader::new(file);
-    
-    // Prepare data structures
-    let mut headers = Vec::new();
-    let mut rows = Vec::new();
-    
-    // Process each line
-    for (line_index, line_result) in reader.lines().enumerate() {
-        let line = line_result?;
-        
-        // Parse the current line into fields
-        let fields = parse_csv_line(&line);
-        
-        if line_index == 0 {
-            // First line is headers
-            headers = fields;
-        } else {
-            // Subsequent lines are data
-            rows.push(fields);
-        }
-    }
-    
-    Ok(CsvData { headers, rows })
 }
 
 /// Parses a line of CSV text into separate fields.
@@ -200,6 +250,7 @@ fn parse_csv_line(line: &str) -> Vec<String> {
 }
 
 /// Describes a CSV file's structure and outputs a summary.
+/// Only reads the header row and counts the remaining rows without loading them.
 ///
 /// # Arguments
 ///
@@ -209,30 +260,50 @@ fn parse_csv_line(line: &str) -> Vec<String> {
 ///
 /// * `Result<(), io::Error>` - Success or an I/O error
 pub fn describe_csv(file_path: impl AsRef<Path>) -> Result<(), io::Error> {
-    // Read the CSV file
-    let csv_data = read_csv_file(file_path)?;
+    // Open the file
+    let file = File::open(file_path)?;
+    let mut reader = BufReader::new(file);
     
-    // Get header and row counts
-    let header_count = csv_data.headers.len();
-    let row_count = csv_data.rows.len();
+    // Read only the first line for headers
+    let mut header_line = String::new();
+    let bytes_read = reader.read_line(&mut header_line)?;
     
-    // Print header information as a TUI table
-    println!("CSV Structure Summary:");
-    println!("=====================");
-    println!("Number of columns: {}", header_count);
-    println!("Number of data rows: {}", row_count);
-    println!();
+    if bytes_read == 0 {
+        return Err(io::Error::new(io::ErrorKind::InvalidData, "Empty CSV file"));
+    }
     
-    // Calculate maximum width needed for each column
+    // Parse headers
+    let headers = parse_csv_line(&header_line);
+    
+    // Count remaining lines without loading their content
+    let mut row_count = 0;
+    let mut line_buffer = String::new();
+    
+    while reader.read_line(&mut line_buffer)? > 0 {
+        if !line_buffer.trim().is_empty() {
+            row_count += 1;
+        }
+        // Clear buffer for next line to minimize memory usage
+        line_buffer.clear();
+    }
+    
+    // Calculate column widths for display
     let mut column_widths = Vec::new();
-    for header in &csv_data.headers {
+    for header in &headers {
         column_widths.push(header.len());
     }
+    
+    // Print summary information
+    println!("CSV Structure Summary:");
+    println!("=====================");
+    println!("Number of columns: {}", headers.len());
+    println!("Number of data rows: {}", row_count);
+    println!();
     
     // Print headers table
     println!("Column Headers:");
     println!("==============");
-    print_headers_table(&csv_data.headers, &column_widths);
+    print_headers_table(&headers, &column_widths);
     
     Ok(())
 }
@@ -260,6 +331,7 @@ fn print_headers_table(headers: &[String], column_widths: &[usize]) {
 }
 
 /// Displays a specific row from a CSV file with headers.
+/// Only reads the header row and the requested row, not the entire file.
 ///
 /// # Arguments
 ///
@@ -270,23 +342,70 @@ fn print_headers_table(headers: &[String], column_widths: &[usize]) {
 ///
 /// * `Result<(), io::Error>` - Success or an I/O error
 pub fn display_csv_row(file_path: impl AsRef<Path>, row_index: usize) -> Result<(), io::Error> {
-    // Read the CSV file
-    let csv_data = read_csv_file(file_path)?;
+    // Open the file
+    let file = File::open(&file_path)?;
+    let mut reader = BufReader::new(file);
     
-    // Check if the requested row index is valid
-    if row_index >= csv_data.rows.len() {
+    // Read only the first line for headers
+    let mut header_line = String::new();
+    let bytes_read = reader.read_line(&mut header_line)?;
+    
+    if bytes_read == 0 {
+        return Err(io::Error::new(io::ErrorKind::InvalidData, "Empty CSV file"));
+    }
+    
+    // Parse headers
+    let headers = parse_csv_line(&header_line);
+    
+    // Skip to the target row (for very large files, this is more efficient than reading each line)
+    let mut current_row = 0;
+    let mut row_data = Vec::new();
+    let mut line_buffer = String::new();
+    
+    while current_row < row_index {
+        // Read a line and check if we reached EOF
+        let bytes_read = reader.read_line(&mut line_buffer)?;
+        if bytes_read == 0 {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                format!("Row index {} out of range (file has only {} data rows)", row_index, current_row)
+            ));
+        }
+        
+        // If line is not empty, count it as a data row
+        if !line_buffer.trim().is_empty() {
+            current_row += 1;
+        }
+        
+        // Clear the buffer for next line
+        line_buffer.clear();
+    }
+    
+    // Read the target row
+    reader.read_line(&mut line_buffer)?;
+    if !line_buffer.trim().is_empty() {
+        row_data = parse_csv_line(&line_buffer);
+    } else {
+        // Try to read the next non-empty line if current is empty
+        while reader.read_line(&mut line_buffer)? > 0 {
+            if !line_buffer.trim().is_empty() {
+                row_data = parse_csv_line(&line_buffer);
+                break;
+            }
+            line_buffer.clear();
+        }
+    }
+    
+    if row_data.is_empty() {
         return Err(io::Error::new(
             io::ErrorKind::InvalidInput,
-            format!("Row index {} out of range (max: {})", row_index, csv_data.rows.len() - 1)
+            format!("Row {} is empty or couldn't be read", row_index)
         ));
     }
     
-    // Get the row data
-    let row_data = &csv_data.rows[row_index];
-    
     // Calculate column widths (max of header and value width)
     let mut column_widths = Vec::new();
-    for (i, header) in csv_data.headers.iter().enumerate() {
+    for (i, header) in headers.iter().enumerate() {
         let header_width = header.len();
         let value_width = if i < row_data.len() { row_data[i].len() } else { 0 };
         column_widths.push(header_width.max(value_width));
@@ -301,7 +420,7 @@ pub fn display_csv_row(file_path: impl AsRef<Path>, row_index: usize) -> Result<
     
     // Print header row
     print!("| ");
-    for (i, header) in csv_data.headers.iter().enumerate() {
+    for (i, header) in headers.iter().enumerate() {
         let width = column_widths[i];
         print!("{:<width$} | ", header, width = width);
     }
@@ -312,7 +431,7 @@ pub fn display_csv_row(file_path: impl AsRef<Path>, row_index: usize) -> Result<
     
     // Print value row
     print!("| ");
-    for (i, _) in csv_data.headers.iter().enumerate() {
+    for (i, _) in headers.iter().enumerate() {
         let width = column_widths[i];
         let value = if i < row_data.len() { &row_data[i] } else { "" };
         print!("{:<width$} | ", value, width = width);
@@ -337,3 +456,5 @@ fn print_horizontal_border(column_widths: &[usize]) {
     }
     println!();
 }
+
+

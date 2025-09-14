@@ -1,0 +1,31 @@
+# Cargo.toml
+[package]
+name = "rows_and_columns"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "A minimal CSV data analysis and TUI dashboard system for terminal and headless environments"
+authors = ["Your Name <your.email@example.com>"]
+keywords = ["csv", "tui", "data-analysis", "statistics", "terminal"]
+categories = ["command-line-utilities", "data-structures"]
+
+[dependencies]
+# Vanilla Rust - no third party dependencies
+
+[[bin]]
+name = "rows_and_columns"
+path = "src/main.rs"
+
+[profile.release-small]
+inherits = "release"
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.release-performance]
+inherits = "release"
+opt-level = 3
+lto = "fat"
+codegen-units = 1

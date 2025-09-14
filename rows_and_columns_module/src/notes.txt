@@ -1,0 +1,41 @@
+rows_and_columns/
+├── src/
+│   ├── main.rs                                           # Entry point
+│   ├── rows_and_columns_module.rs                        # Primary module
+│   ├── csv_processor_module.rs                           # CSV handling
+│   ├── metadata_manager_module.rs                        # TOML metadata
+│   ├── statistical_analyzer_module.rs                    # Statistics
+│   ├── tui_dashboard_module.rs                          # TUI charts
+│   ├── file_system_bridge_module.rs                     # File operations
+│   ├── error_types_module.rs                            # Error definitions
+│   ├── ff_file_fantastic_module.rs                      # FF integration
+│   └── manage_absolute_executable_directory_relative_paths.rs  # Path management
+├── rows_columns_data/                                    # Binary-relative data storage
+│   ├── csv_imports/                                     # Imported CSV metadata
+│   │   ├── dataset_001_customers/                      # First dataset
+│   │   │   ├── csv_metadata.toml                       # Dataset metadata
+│   │   │   ├── column_001_customer_id/                 # Column directories
+│   │   │   │   ├── row_0001/                          # Individual cells
+│   │   │   │   │   └── value.txt                      # Cell value
+│   │   │   │   ├── row_0002/
+│   │   │   │   │   └── value.txt
+│   │   │   │   └── ...
+│   │   │   ├── column_002_customer_name/
+│   │   │   └── column_003_purchase_amount/
+│   │   └── dataset_002_sales/                          # Another dataset
+│   └── analysis_cache/                                  # Computed statistics cache
+├── Cargo.toml
+└── README.md
+
+
+
+Unicode Mode:    ASCII Mode:
+┌─┐ (max)       -|- (max)
+  │                |
+┌─┐ (q3)        | | (q3)
+|    |         ---
+├─┤ (median)    | | (median)  
+|    |             | |
+└─┘ (q1)        | | (q1)
+  │                |
+└─┘ (min)       -|- (min)

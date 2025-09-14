@@ -1,0 +1,6 @@
+id,name,age,breed,color,favorite_food,is_indoor
+1,Whiskers,3,Siamese,Cream,Chicken,TRUE
+2,Mittens,5,Tabby,Gray,Tuna,FALSE
+3,Shadow,2,Black Cat,Black,Salmon,TRUE
+4,Luna,4,Persian,White,Dry Food,TRUE
+5,Oliver,1,Maine Coon,Brown,Wet Food,FALSE

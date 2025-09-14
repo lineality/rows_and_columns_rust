@@ -110,13 +110,13 @@ pub fn run_rows_and_columns_application() -> RowsAndColumnsResult<PathBuf> {
             _ => {
                 // Treat the first argument as a CSV file path
                 let csv_file_path = &command_line_arguments[1];
-                return rc_analyze_datafile_save_results_to_resultsfile(csv_file_path, &directory_paths);
+                return rc_analyze_datafile_save_results_to_resultsfile(csv_file_path);
             }
         }
     } else {
         // No command line arguments - start interactive file input
         let csv_file_path_from_qa = interactive_csv_file_path_input()?;
-        return rc_analyze_datafile_save_results_to_resultsfile(&csv_file_path_from_qa, &directory_paths);
+        return rc_analyze_datafile_save_results_to_resultsfile(&csv_file_path_from_qa);
     }
 }
 
@@ -362,7 +362,6 @@ fn validate_user_provided_csv_file_path(user_file_path: &str) -> Result<String, 
 /// * `RowsAndColumnsError::MetadataError` - If metadata operations fail
 pub fn rc_analyze_datafile_save_results_to_resultsfile(
     csv_file_path_argument: &str,
-    directory_paths: &ApplicationDirectoryPaths,
 ) -> RowsAndColumnsResult<PathBuf> {
     // Step 1: Validate the provided file path
     let csv_file_absolute_path = validate_csv_file_path_from_argument(csv_file_path_argument)?;
@@ -380,7 +379,7 @@ pub fn rc_analyze_datafile_save_results_to_resultsfile(
     let report_file_path = save_analysis_summary_to_file(
         &csv_file_absolute_path,
         &csv_analysis_results,
-        directory_paths
+        // directory_paths
     )?;
 
     // Step 5: Append detailed analysis to report file

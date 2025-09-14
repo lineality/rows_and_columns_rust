@@ -24,10 +24,6 @@ use std::io::{BufRead, BufReader};
 use std::path::{PathBuf};
 use std::collections::HashMap;
 
-use super::rows_and_columns_module::{
-    ApplicationDirectoryPaths,
-};
-
 // Import our error handling system
 use super::error_types_module::{
     RowsAndColumnsError,
@@ -1069,7 +1065,6 @@ fn calculate_categorical_statistics(column_values: &[String]) -> RowsAndColumnsR
 pub fn save_analysis_summary_to_file(
     csv_file_path: &PathBuf,
     analysis_results: &CsvAnalysisResults,
-    directory_paths: &ApplicationDirectoryPaths,
 ) -> RowsAndColumnsResult<PathBuf> {
     // Determine report file path in same directory as CSV
     let csv_parent_directory = csv_file_path.parent()
@@ -1136,7 +1131,7 @@ pub fn save_analysis_summary_to_file(
     toml_content.push_str("[file_paths]\n");
     toml_content.push_str(&format!("csv_file = \"{}\"\n", csv_file_path.display()));
     toml_content.push_str(&format!("metadata_file = \"{}\"\n", analysis_results.metadata_file_path.display()));
-    toml_content.push_str(&format!("storage_directory = \"{}\"\n", directory_paths.csv_imports_directory.display()));
+    // toml_content.push_str(&format!("storage_directory = \"{}\"\n", directory_paths.csv_imports_directory.display()));
     toml_content.push_str("\n");
 
     // Write content to file

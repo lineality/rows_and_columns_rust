@@ -1,0 +1,151 @@
+[metadata]
+timestamp = "1757880650"
+original_csv_file = "/home/oopsy/code/rows_and_columns_rust/rows_columns_mini/test.csv"
+report_generated_by = "rows_and_columns"
+
+[summary]
+file_size_bytes = 241
+total_data_rows = 4
+total_columns = 7
+continuous_columns = 2
+categorical_columns = 5
+has_header_row = true
+
+[file_paths]
+csv_file = "/home/oopsy/code/rows_and_columns_rust/rows_columns_mini/test.csv"
+metadata_file = "/home/oopsy/code/rows_and_columns_rust/rows_columns_mini/test.csv_metadata.toml"
+storage_directory = "/home/oopsy/code/rows_and_columns_rust/rows_columns_mini/target/debug/rows_columns_data/csv_imports"
+
+[columns]
+
+[columns.id]
+column_index = 0
+column_name = "id"
+data_type = "Integer"
+field_type = "Continuous"
+non_empty_values = 5
+empty_values = 0
+min_value = 1.000
+q1_value = 2.000
+q2_median_value = 3.000
+q3_value = 4.000
+max_value = 5.000
+mean_value = 3.000
+standard_deviation = 1.414
+missing_percentage = 0.0
+sample_values = ["1", "2", "3", "4", "5"]
+
+[columns.name]
+column_index = 1
+column_name = "name"
+data_type = "String"
+field_type = "Categorical"
+non_empty_values = 5
+empty_values = 0
+unique_value_count = 5
+missing_percentage = 0.0
+mode_value = "Mittens"
+mode_percentage = 20.0
+value_distribution = [
+  { value = "Mittens", count = 1, percentage = 20.0 },
+  { value = "Whiskers", count = 1, percentage = 20.0 },
+  { value = "Oliver", count = 1, percentage = 20.0 },
+  { value = "Shadow", count = 1, percentage = 20.0 },
+  { value = "Luna", count = 1, percentage = 20.0 },
+]
+sample_values = ["Whiskers", "Mittens", "Shadow", "Luna", "Oliver"]
+
+[columns.age]
+column_index = 2
+column_name = "age"
+data_type = "Integer"
+field_type = "Continuous"
+non_empty_values = 5
+empty_values = 0
+min_value = 1.000
+q1_value = 2.000
+q2_median_value = 3.000
+q3_value = 4.000
+max_value = 5.000
+mean_value = 3.000
+standard_deviation = 1.414
+missing_percentage = 0.0
+sample_values = ["3", "5", "2", "4", "1"]
+
+[columns.breed]
+column_index = 3
+column_name = "breed"
+data_type = "String"
+field_type = "Categorical"
+non_empty_values = 5
+empty_values = 0
+unique_value_count = 5
+missing_percentage = 0.0
+mode_value = "Siamese"
+mode_percentage = 20.0
+value_distribution = [
+  { value = "Siamese", count = 1, percentage = 20.0 },
+  { value = "Maine Coon", count = 1, percentage = 20.0 },
+  { value = "Persian", count = 1, percentage = 20.0 },
+  { value = "Tabby", count = 1, percentage = 20.0 },
+  { value = "Black Cat", count = 1, percentage = 20.0 },
+]
+sample_values = ["Siamese", "Tabby", "Black Cat", "Persian", "Maine Coon"]
+
+[columns.color]
+column_index = 4
+column_name = "color"
+data_type = "String"
+field_type = "Categorical"
+non_empty_values = 5
+empty_values = 0
+unique_value_count = 5
+missing_percentage = 0.0
+mode_value = "White"
+mode_percentage = 20.0
+value_distribution = [
+  { value = "White", count = 1, percentage = 20.0 },
+  { value = "Black", count = 1, percentage = 20.0 },
+  { value = "Gray", count = 1, percentage = 20.0 },
+  { value = "Brown", count = 1, percentage = 20.0 },
+  { value = "Cream", count = 1, percentage = 20.0 },
+]
+sample_values = ["Cream", "Gray", "Black", "White", "Brown"]
+
+[columns.favorite_food]
+column_index = 5
+column_name = "favorite_food"
+data_type = "String"
+field_type = "Categorical"
+non_empty_values = 5
+empty_values = 0
+unique_value_count = 5
+missing_percentage = 0.0
+mode_value = "Tuna"
+mode_percentage = 20.0
+value_distribution = [
+  { value = "Tuna", count = 1, percentage = 20.0 },
+  { value = "Dry Food", count = 1, percentage = 20.0 },
+  { value = "Chicken", count = 1, percentage = 20.0 },
+  { value = "Wet Food", count = 1, percentage = 20.0 },
+  { value = "Salmon", count = 1, percentage = 20.0 },
+]
+sample_values = ["Chicken", "Tuna", "Salmon", "Dry Food", "Wet Food"]
+
+[columns.is_indoor]
+column_index = 6
+column_name = "is_indoor"
+data_type = "Boolean"
+field_type = "Categorical"
+non_empty_values = 5
+empty_values = 0
+unique_value_count = 2
+missing_percentage = 0.0
+mode_value = "TRUE"
+mode_percentage = 60.0
+value_distribution = [
+  { value = "TRUE", count = 3, percentage = 60.0 },
+  { value = "FALSE", count = 2, percentage = 40.0 },
+]
+sample_values = ["TRUE", "FALSE", "TRUE", "TRUE", "FALSE"]
+

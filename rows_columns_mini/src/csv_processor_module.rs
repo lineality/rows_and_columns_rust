@@ -1,4 +1,3 @@
-
 // src/csv_processor_module.rs
 
 /// CSV file processing and metadata analysis for rows_and_columns
@@ -21,8 +20,8 @@
 /// - Fallback handling: graceful handling of missing headers or mixed types
 
 use std::fs::File;
-use std::io::{self, BufRead, BufReader, Write};
-use std::path::{Path, PathBuf};
+use std::io::{BufRead, BufReader};
+use std::path::{PathBuf};
 use std::collections::HashMap;
 
 use super::rows_and_columns_module::{
@@ -35,15 +34,7 @@ use super::error_types_module::{
     RowsAndColumnsResult,
     create_file_system_error,
     create_csv_processing_error,
-    create_metadata_error,
     create_configuration_error,
-};
-
-// Import path management for metadata file operations
-use super::manage_absolute_executable_directory_relative_paths::{
-    make_input_path_name_abs_executabledirectoryrelative_nocheck,
-    abs_executable_directory_relative_exists,
-    prepare_file_parent_directories_abs_executabledirectoryrelative,
 };
 
 /// Configuration constants for CSV processing
@@ -83,22 +74,22 @@ impl CsvColumnDataType {
         }
     }
 
-    /// Creates a data type from a TOML string representation
-    ///
-    /// # Arguments
-    /// * `toml_string` - The string representation from TOML file
-    ///
-    /// # Returns
-    /// * `Option<CsvColumnDataType>` - The data type or None if invalid
-    pub fn from_toml_string(toml_string: &str) -> Option<CsvColumnDataType> {
-        match toml_string.to_lowercase().as_str() {
-            "boolean" | "bool" => Some(CsvColumnDataType::Boolean),
-            "integer" | "int" => Some(CsvColumnDataType::Integer),
-            "float" | "decimal" | "number" => Some(CsvColumnDataType::Float),
-            "string" | "text" | "str" => Some(CsvColumnDataType::String),
-            _ => None,
-        }
-    }
+    // /// Creates a data type from a TOML string representation
+    // ///
+    // /// # Arguments
+    // /// * `toml_string` - The string representation from TOML file
+    // ///
+    // /// # Returns
+    // /// * `Option<CsvColumnDataType>` - The data type or None if invalid
+    // pub fn from_toml_string(toml_string: &str) -> Option<CsvColumnDataType> {
+    //     match toml_string.to_lowercase().as_str() {
+    //         "boolean" | "bool" => Some(CsvColumnDataType::Boolean),
+    //         "integer" | "int" => Some(CsvColumnDataType::Integer),
+    //         "float" | "decimal" | "number" => Some(CsvColumnDataType::Float),
+    //         "string" | "text" | "str" => Some(CsvColumnDataType::String),
+    //         _ => None,
+    //     }
+    // }
 }
 
 /// Information about a detected CSV column
@@ -133,7 +124,7 @@ pub struct CsvColumnInformation {
 #[derive(Debug)]
 pub struct CsvAnalysisResults {
     /// Absolute path to the original CSV file
-    pub csv_file_path: PathBuf,
+    // pub csv_file_path: PathBuf,
 
     /// Whether the CSV file has a header row
     pub has_header_row: bool,
@@ -150,8 +141,8 @@ pub struct CsvAnalysisResults {
     /// Path to the metadata TOML file (existing or to-be-created)
     pub metadata_file_path: PathBuf,
 
-    /// Whether a metadata file already existed
-    pub metadata_file_already_existed: bool,
+    // Whether a metadata file already existed
+    // pub metadata_file_already_existed: bool,
 }
 
 /// Analyzes a CSV file and detects column structure and data types
@@ -207,13 +198,11 @@ pub fn analyze_csv_file_structure_and_types(csv_file_path: &PathBuf) -> RowsAndC
 
     // Return complete analysis results
     Ok(CsvAnalysisResults {
-        csv_file_path: csv_file_path.clone(),
         has_header_row,
         total_column_count: column_count,
         total_data_row_count: data_row_count,
         column_information_list,
         metadata_file_path,
-        metadata_file_already_existed,
     })
 }
 
@@ -1058,117 +1047,6 @@ fn calculate_categorical_statistics(column_values: &[String]) -> RowsAndColumnsR
         mode_value,
         mode_percentage,
     })
-}
-
-/// Displays enhanced CSV analysis results with comprehensive statistics
-///
-/// This function shows detailed pandas-style statistical information
-/// appropriate for each column's data type.
-///
-/// # Arguments
-/// * `enhanced_analysis_results` - The enhanced statistical analysis results
-///
-/// # Returns
-/// * `RowsAndColumnsResult<()>` - Success or display error
-pub fn display_enhanced_csv_analysis_results(
-    enhanced_analysis_results: &[EnhancedCsvColumnInformation]
-) -> RowsAndColumnsResult<()> {
-    println!("═══════════════════════════════════════════════════════════════");
-    println!("  CSV Analysis Results");
-    println!("═══════════════════════════════════════════════════════════════");
-    println!();
-
-    for (display_index, enhanced_column_info) in enhanced_analysis_results.iter().enumerate() {
-        let display_number = display_index + 1;
-        let basic_info = &enhanced_column_info.basic_info;
-
-        // Display column header
-        println!("{}. {} ({} - {})",
-            display_number,
-            basic_info.column_name,
-            basic_info.detected_data_type.to_toml_string(),
-            match enhanced_column_info.field_type {
-                CsvFieldType::Categorical => "categorical",
-                CsvFieldType::Continuous => "continuous",
-            }
-        );
-
-        // Display appropriate statistics based on field type
-        match enhanced_column_info.field_type {
-            CsvFieldType::Continuous => {
-                if let Some(numerical_stats) = &enhanced_column_info.numerical_statistics {
-                    display_numerical_statistics(numerical_stats);
-                }
-            }
-            CsvFieldType::Categorical => {
-                if let Some(categorical_stats) = &enhanced_column_info.categorical_statistics {
-                    display_categorical_statistics(categorical_stats);
-                }
-            }
-        }
-
-        println!();
-    }
-
-    println!("═══════════════════════════════════════════════════════════════");
-    println!();
-
-    Ok(())
-}
-
-/// Displays numerical statistics in pandas-style format
-///
-/// # Arguments
-/// * `numerical_stats` - The numerical statistics to display
-fn display_numerical_statistics(numerical_stats: &NumericalColumnStatistics) {
-    println!("   Field-type: continuous");
-    println!("   min: {:.3}    q1: {:.3}    q2: {:.3}    q3: {:.3}    max: {:.3}",
-        numerical_stats.min_value,
-        numerical_stats.q1_value,
-        numerical_stats.q2_median_value,
-        numerical_stats.q3_value,
-        numerical_stats.max_value
-    );
-    println!("   mean: {:.3}    stdev: {:.3}",
-        numerical_stats.mean_value,
-        numerical_stats.standard_deviation
-    );
-    println!("   %missing: {:.1}%", numerical_stats.missing_percentage);
-}
-
-/// Displays categorical statistics with value distribution
-///
-/// # Arguments
-/// * `categorical_stats` - The categorical statistics to display
-fn display_categorical_statistics(categorical_stats: &CategoricalColumnStatistics) {
-    println!("   Field-type: categorical");
-    println!("   Unique values: {}", categorical_stats.unique_value_count);
-    println!("   %missing: {:.1}%", categorical_stats.missing_percentage);
-
-    if let Some(mode_value) = &categorical_stats.mode_value {
-        println!("   Mode: {} ({:.1}%)", mode_value, categorical_stats.mode_percentage);
-    }
-
-    println!("   Value Distribution:");
-
-    // Show top values (limit to 5 for display)
-    let display_limit = 5.min(categorical_stats.value_frequencies.len());
-    for value_freq in categorical_stats.value_frequencies.iter().take(display_limit) {
-        println!("     {}: {:.1}% ({} values)",
-            value_freq.value,
-            value_freq.percentage,
-            value_freq.count
-        );
-    }
-
-    // Show summary if there are more values
-    if categorical_stats.value_frequencies.len() > display_limit {
-        let remaining_count = categorical_stats.value_frequencies.len() - display_limit;
-        println!("     ... (showing top {} of {} unique values)",
-            display_limit,
-            categorical_stats.unique_value_count
-        );
-    }
 }
 
 /// Saves CSV analysis summary information to a TOML-formatted report file

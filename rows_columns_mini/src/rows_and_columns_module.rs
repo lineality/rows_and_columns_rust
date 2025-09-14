@@ -110,13 +110,13 @@ pub fn run_rows_and_columns_application() -> RowsAndColumnsResult<PathBuf> {
             _ => {
                 // Treat the first argument as a CSV file path
                 let csv_file_path = &command_line_arguments[1];
-                return filesave_processcsv_file_from_command_line(csv_file_path, &directory_paths);
+                return rc_analyze_datafile_save_results_to_resultsfile(csv_file_path, &directory_paths);
             }
         }
     } else {
         // No command line arguments - start interactive file input
         let csv_file_path_from_qa = interactive_csv_file_path_input()?;
-        return filesave_processcsv_file_from_command_line(&csv_file_path_from_qa, &directory_paths);
+        return rc_analyze_datafile_save_results_to_resultsfile(&csv_file_path_from_qa, &directory_paths);
     }
 }
 
@@ -360,7 +360,7 @@ fn validate_user_provided_csv_file_path(user_file_path: &str) -> Result<String, 
 /// * `RowsAndColumnsError::FileSystemError` - If file access or validation fails
 /// * `RowsAndColumnsError::CsvProcessingError` - If CSV parsing fails
 /// * `RowsAndColumnsError::MetadataError` - If metadata operations fail
-fn filesave_processcsv_file_from_command_line(
+pub fn rc_analyze_datafile_save_results_to_resultsfile(
     csv_file_path_argument: &str,
     directory_paths: &ApplicationDirectoryPaths,
 ) -> RowsAndColumnsResult<PathBuf> {

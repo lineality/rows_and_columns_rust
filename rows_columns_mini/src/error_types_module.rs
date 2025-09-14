@@ -34,38 +34,6 @@ pub enum RowsAndColumnsError {
         csv_column_identifier: Option<String>,
     },
 
-    // /// Metadata file (TOML) parsing or validation errors
-    // MetadataError {
-    //     /// Description of the metadata operation that failed
-    //     metadata_operation_description: String,
-    //     /// The metadata file path that caused the error
-    //     metadata_file_path: String,
-    // },
-
-    // /// Statistical calculation errors (division by zero, insufficient data, etc.)
-    // StatisticalAnalysisError {
-    //     /// Description of the statistical operation that failed
-    //     analysis_operation_description: String,
-    //     /// The column name being analyzed when error occurred
-    //     column_name_being_analyzed: String,
-    // },
-
-    // /// TUI dashboard rendering or user interface errors
-    // TuiRenderingError {
-    //     /// Description of the TUI operation that failed
-    //     tui_operation_description: String,
-    // },
-
-    // /// Data type conversion or validation errors
-    // DataTypeValidationError {
-    //     /// Description of the data type operation that failed
-    //     data_type_operation_description: String,
-    //     /// The value that failed validation
-    //     invalid_value: String,
-    //     /// The expected data type
-    //     expected_data_type: String,
-    // },
-
     /// General configuration or setup errors
     ConfigurationError {
         /// Description of the configuration problem
@@ -115,50 +83,6 @@ impl fmt::Display for RowsAndColumnsError {
                     csv_operation_description, line_info, column_info
                 )
             }
-
-            // RowsAndColumnsError::MetadataError {
-            //     metadata_operation_description,
-            //     metadata_file_path
-            // } => {
-            //     write!(
-            //         formatter,
-            //         "Metadata operation failed: {} for file: {}",
-            //         metadata_operation_description, metadata_file_path
-            //     )
-            // }
-
-            // RowsAndColumnsError::StatisticalAnalysisError {
-            //     analysis_operation_description,
-            //     column_name_being_analyzed
-            // } => {
-            //     write!(
-            //         formatter,
-            //         "Statistical analysis failed: {} for column '{}'",
-            //         analysis_operation_description, column_name_being_analyzed
-            //     )
-            // }
-
-            // RowsAndColumnsError::TuiRenderingError {
-            //     tui_operation_description
-            // } => {
-            //     write!(
-            //         formatter,
-            //         "TUI rendering failed: {}",
-            //         tui_operation_description
-            //     )
-            // }
-
-            // RowsAndColumnsError::DataTypeValidationError {
-            //     data_type_operation_description,
-            //     invalid_value,
-            //     expected_data_type
-            // } => {
-            //     write!(
-            //         formatter,
-            //         "Data type validation failed: {} - Value '{}' is not a valid {}",
-            //         data_type_operation_description, invalid_value, expected_data_type
-            //     )
-            // }
 
             RowsAndColumnsError::ConfigurationError {
                 configuration_issue_description

@@ -162,12 +162,12 @@ pub struct CsvAnalysisResults {
 /// * `RowsAndColumnsError::CsvProcessingError` - If CSV parsing fails
 /// * `RowsAndColumnsError::MetadataError` - If metadata file operations fail
 pub fn analyze_csv_file_structure_and_types(csv_file_path: &PathBuf) -> RowsAndColumnsResult<CsvAnalysisResults> {
-    println!("🔍 Analyzing CSV file structure...");
+    // println!("🔍 Analyzing CSV file structure...");
 
     // Step 1: Read and analyze the CSV file structure
     let (has_header_row, column_count, data_row_count) = analyze_csv_basic_structure(csv_file_path)?;
 
-    println!("  ✓ Basic structure detected:");
+    println!("    Structure of Data:");
     println!("    Columns: {}", column_count);
     println!("    Data rows: {}", data_row_count);
     println!("    Has header: {}", has_header_row);
@@ -179,22 +179,22 @@ pub fn analyze_csv_file_structure_and_types(csv_file_path: &PathBuf) -> RowsAndC
         column_count
     )?;
 
-    println!("  ✓ Column types analyzed");
+    // println!("  ✓ Column types analyzed");
 
     // Step 3: Determine metadata file path and check if it exists
     let metadata_file_path = determine_metadata_file_path(csv_file_path)?;
-    let metadata_file_already_existed = metadata_file_path.exists();
+    // let metadata_file_already_existed = metadata_file_path.exists();
 
-    if metadata_file_already_existed {
-        println!("  ✓ Found existing metadata file: {}", metadata_file_path.display());
-    } else {
-        println!("  ✓ Will create metadata file: {}", metadata_file_path.display());
-    }
+    // if metadata_file_already_existed {
+    //     println!(" Found existing metadata file: {}", metadata_file_path.display());
+    // } else {
+    //     println!(" Will create metadata file: {}", metadata_file_path.display());
+    // }
 
     // Step 4: Create or update metadata file
     create_or_update_metadata_file(&metadata_file_path, &column_information_list)?;
 
-    println!("  ✓ Metadata file updated");
+    // println!("  Metadata file updated");
 
     // Return complete analysis results
     Ok(CsvAnalysisResults {
@@ -765,7 +765,7 @@ pub fn perform_enhanced_statistical_analysis(
     csv_file_path: &PathBuf,
     basic_analysis_results: &CsvAnalysisResults,
 ) -> RowsAndColumnsResult<Vec<EnhancedCsvColumnInformation>> {
-    println!("📊 Performing enhanced statistical analysis...");
+    // println!("📊 Performing enhanced statistical analysis...");
 
     let mut enhanced_column_info_list = Vec::new();
 
@@ -805,7 +805,7 @@ pub fn perform_enhanced_statistical_analysis(
         enhanced_column_info_list.push(enhanced_column_info);
     }
 
-    println!("  ✓ Enhanced statistical analysis complete");
+    println!("  Data analysis complete: OK");
 
     Ok(enhanced_column_info_list)
 }

@@ -209,8 +209,8 @@ pub fn mkdir_new_abs_executabledirectoryrelative_canonicalized<P: AsRef<Path>>(d
 ///
 /// use example:
 /// // Ensure the project graph data directory exists relative to the executable
-/// let project_graph_directory_result = make_verify_or_create_executabledirectoryrelative_canonicalized_dir_path("project_graph_data");
-
+/// let project_graph_directory_result =
+/// make_verify_or_create_executabledirectoryrelative_canonicalized_dir_path("project_graph_data");
 /// // Handle any errors that might occur during directory creation or verification
 /// let project_graph_directory = match project_graph_directory_result {
 ///     Ok(directory_path) => directory_path,
